@@ -1,4 +1,4 @@
-**Задание 1**
+![image](https://github.com/user-attachments/assets/a9ab53b4-8c6d-40ae-a0d5-a29fd3a9adf3)**Задание 1**
 
 Создать Deployment приложения, использующего локальный PV, созданный вручную.
 
@@ -167,7 +167,13 @@ spec:
 Установим nsf в k8s
 
 
-![Image alt](скрин8)
+![Image alt](https://github.com/mezhibo/kubernetes7/blob/626ba8e7df7105094f4916ad78bcf2a498fd8c50/IMG/8.jpg)
+
+
+Проверим состояние службы nfs
+
+
+![Image alt](https://github.com/mezhibo/kubernetes7/blob/626ba8e7df7105094f4916ad78bcf2a498fd8c50/IMG/9.jpg)
 
 
 
@@ -224,3 +230,48 @@ spec:
     requests:
       storage: 1Gi
 ```
+
+
+Создадим sc_nfs.yaml
+
+```
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs-csi
+provisioner: nfs.csi.k8s.io
+parameters:
+  server: 127.0.0.1
+  share: /srv/nfs
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+mountOptions:
+  - hard
+  - nfsvers=4.1
+```
+
+
+Проверяем что у нас создался под и pv и pvc
+
+![Image alt](https://github.com/mezhibo/kubernetes7/blob/626ba8e7df7105094f4916ad78bcf2a498fd8c50/IMG/10.jpg)
+
+
+Проверим возможность чтения и записи файла изнутри пода:
+
+Создадим файл на ноде:
+
+![Image alt](https://github.com/mezhibo/kubernetes7/blob/626ba8e7df7105094f4916ad78bcf2a498fd8c50/IMG/11.jpg)
+
+
+
+Теперь провалимся внутрь пода нашего приложения, и в примонтированной шаре создадим файл readme.txt
+
+![Image alt](https://github.com/mezhibo/kubernetes7/blob/626ba8e7df7105094f4916ad78bcf2a498fd8c50/IMG/12.jpg)
+
+Теперь выйдем из пода и проверим наличие этого файла в нашей nfs
+
+
+![Image alt](https://github.com/mezhibo/kubernetes7/blob/626ba8e7df7105094f4916ad78bcf2a498fd8c50/IMG/13.jpg)
+
+
+И теперь видим что файл появился

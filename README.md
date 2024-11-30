@@ -143,3 +143,84 @@ spec:
 
 ![Image alt](https://github.com/mezhibo/kubernetes7/blob/89ec7c7bbb61bd885186361b53ef11a19b6666e8/IMG/7.jpg)
 
+
+
+
+
+**Задание 2**
+
+
+Создать Deployment приложения, которое может хранить файлы на NFS с динамическим созданием PV.
+
+1. Включить и настроить NFS-сервер на MicroK8S.
+
+2. Создать Deployment приложения состоящего из multitool, и подключить к нему PV, созданный автоматически на сервере NFS.
+
+3. Продемонстрировать возможность чтения и записи файла изнутри пода.
+
+4. Предоставить манифесты, а также скриншоты или вывод необходимых команд.
+
+
+**Решение 2**
+
+
+Установим nsf в k8s
+
+
+![Image alt](скрин8)
+
+
+
+Создадим деплоймент 
+
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-nfs
+  labels:
+    app: app-nfs
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-nfs
+  template:
+    metadata:
+      labels:
+        app: app-nfs
+    spec:
+      containers:
+      - name: multitool
+        image: wbitt/network-multitool
+        env:
+          - name: HTTP_PORT
+            value: "80"
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: vol-nfs
+          mountPath: /nfs-share
+      volumes:
+      - name: vol-nfs
+        persistentVolumeClaim:
+          claimName: nfs-share
+```
+
+
+Далее создадим pvc-nfs
+
+```
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nfs-share
+spec:
+  storageClassName: "nfs-share"
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+```
